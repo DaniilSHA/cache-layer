@@ -18,41 +18,41 @@ public class CacheApplication {
 	public static void main(String[] args) throws InterruptedException
 	{
 		ConfigurableApplicationContext context = SpringApplication.run(CacheApplication.class, args);
-		Start.start();
-		TreeNode.start();
-
-		UserStorage userStorage = context.getBean("userStorage", UserStorage.class);
-
-
-		System.out.println(userStorage.readAll());
-		System.out.println(userStorage.readAll());
-		System.out.println(userStorage.readAll());
-
-		System.out.println(userStorage.read(0));
-		System.out.println(userStorage.read(0));
-
-		userStorage.create(new User(userStorage.emitId(), "Ivan"));
-
-		System.out.println(userStorage.read(0));
-		System.out.println(userStorage.read(0));
-
-		System.out.println(userStorage.readAll());
-		System.out.println(userStorage.readAll());
-
-		System.out.println(userStorage.read(3));
-		System.out.println(userStorage.read(3));
-
-		userStorage.update(3, "Roma");
-
-		System.out.println(userStorage.read(3));
-		System.out.println(userStorage.read(3));
-
-		System.out.println(userStorage.readAll());
-		System.out.println(userStorage.readAll());
-
-		userStorage.delete(3);
-		System.out.println(userStorage.readAll());
-		System.out.println(userStorage.read(3));
+//		Start.start();
+//		TreeNode.start();
+//
+//		UserStorage userStorage = context.getBean("userStorage", UserStorage.class);
+//
+//
+//		System.out.println(userStorage.readAll());
+//		System.out.println(userStorage.readAll());
+//		System.out.println(userStorage.readAll());
+//
+//		System.out.println(userStorage.read(0));
+//		System.out.println(userStorage.read(0));
+//
+//		userStorage.create(new User(userStorage.emitId(), "Ivan"));
+//
+//		System.out.println(userStorage.read(0));
+//		System.out.println(userStorage.read(0));
+//
+//		System.out.println(userStorage.readAll());
+//		System.out.println(userStorage.readAll());
+//
+//		System.out.println(userStorage.read(3));
+//		System.out.println(userStorage.read(3));
+//
+//		userStorage.update(3, "Roma");
+//
+//		System.out.println(userStorage.read(3));
+//		System.out.println(userStorage.read(3));
+//
+//		System.out.println(userStorage.readAll());
+//		System.out.println(userStorage.readAll());
+//
+//		userStorage.delete(3);
+//		System.out.println(userStorage.readAll());
+//		System.out.println(userStorage.read(3));
 	}
 
 }

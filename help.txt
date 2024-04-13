@@ -1,0 +1,40 @@
+docker-compose.yaml
+
+version: '3.3'
+
+services:
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - /path/to/local/dаta:/root/redis
+      - /path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD=my-password
+      - REDIS_PORT=6379
+      - REDIS_DATABASES=16
+
+---------------------------
+
+Jedis jedis = new Jedis("localhost", 6379);
+jedis.set("user1", "bro");
+String user1 = jedis.get("user1");
+System.out.println(user1);
+
+----------------------------
+
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<dependency>
+	<groupId>redis.clients</groupId>
+	<artifactId>jedis</artifactId>
+	<version>5.0.2</version>
+</dependency>
+
+----------------------------
+String s = jedis.configSet("maxmemory-policy", "allkeys-lru");
