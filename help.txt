@@ -1,40 +1,119 @@
-docker-compose.yaml
-
-version: '3.3'
-
+version: '2'
 services:
-  redis:
-    image: redis:latest
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - /path/to/local/dаta:/root/redis
-      - /path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.4
     environment:
-      - REDIS_PASSWORD=my-password
-      - REDIS_PORT=6379
-      - REDIS_DATABASES=16
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
 
----------------------------
+  kafka:
+    image: confluentinc/cp-kafka:7.4.4
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-Jedis jedis = new Jedis("localhost", 6379);
-jedis.set("user1", "bro");
-String user1 = jedis.get("user1");
-System.out.println(user1);
-
-----------------------------
+-------------------------------
 
 <dependency>
-	<groupId>org.springframework.boot</groupId>
-	<artifactId>spring-boot-starter-web</artifactId>
+  <groupId>org.springframework.kafka</groupId>
+  <artifactId>spring-kafka</artifactId>
 </dependency>
 
-<dependency>
-	<groupId>redis.clients</groupId>
-	<artifactId>jedis</artifactId>
-	<version>5.0.2</version>
-</dependency>
+-------------------------------
 
-----------------------------
-String s = jedis.configSet("maxmemory-policy", "allkeys-lru");
+@Configuration
+public class KafkaTopicConfig {
+
+    @Value(value = "${spring.kafka.bootstrap-servers}")
+    private String bootstrapAddress;
+
+    @Bean
+    public KafkaAdmin kafkaAdmin() {
+        Map<String, Object> configs = new HashMap<>();
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        return new KafkaAdmin(configs);
+    }
+
+    @Bean
+    public NewTopic topic1() {
+         return new NewTopic("baeldung", 1, (short) 1);
+    }
+}
+
+
+-------------------------------
+
+
+ @Bean
+    public ProducerFactory<String, String> producerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(
+          ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+          bootstrapAddress);
+        configProps.put(
+          ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+          StringSerializer.class);
+        configProps.put(
+          ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+          StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+
+-------------------------------
+
+
+@EnableKafka
+@Configuration
+public class KafkaConsumerConfig {
+
+    @Bean
+    public ConsumerFactory<String, String> consumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(
+          ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+          bootstrapAddress);
+        props.put(
+          ConsumerConfig.GROUP_ID_CONFIG,
+          groupId);
+        props.put(
+          ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+          StringDeserializer.class);
+        props.put(
+          ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+          StringDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String>
+      kafkaListenerContainerFactory() {
+
+        ConcurrentKafkaListenerContainerFactory<String, String> factory =
+          new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        return factory;
+    }
+
+
+-------------------------------
+
+    @KafkaListener(topics = "topicName")
+    public void listen(String message) {
+        System.out.println("Received Message in group foo: " + message);
+    }
+}

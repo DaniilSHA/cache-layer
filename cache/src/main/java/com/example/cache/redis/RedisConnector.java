@@ -6,7 +6,7 @@ import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
 
-@Service
+//@Service
 public class RedisConnector
 {
     private Jedis jedis;
